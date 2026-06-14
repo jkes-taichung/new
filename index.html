@@ -108,6 +108,7 @@
             text-align: center;
             font-size: 14px;
             font-weight: bold;
+            word-break: break-all;
         }
         .success { color: #38a169; }
         .error { color: #e53e3e; }
@@ -164,7 +165,7 @@
 </div>
 
 <script>
-    // [請在此處替換] 貼上您在 Google Apps Script 部署後取得的「網頁應用程式 URL」
+    // ⚠️ [請在此處替換] 貼上您在 Google Apps Script 部署後取得的「網頁應用程式 URL」(結尾必須是 /exec)
     const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
 
     document.getElementById('dataForm').addEventListener('submit', function(e) {
@@ -173,6 +174,13 @@
         const submitBtn = document.getElementById('submitBtn');
         const msgDiv = document.getElementById('responseMessage');
         
+        // 防呆：檢查是否忘記更換網址
+        if (SCRIPT_URL === "YOUR_APPS_SCRIPT_WEB_APP_URL" || SCRIPT_URL.trim() === "") {
+            msgDiv.textContent = "❌ 錯誤：您尚未在 HTML 程式碼中更換您的 SCRIPT_URL 網址！";
+            msgDiv.className = "message error";
+            return;
+        }
+        
         submitBtn.disabled = true;
         msgDiv.textContent = "資料傳送中，請稍候...";
         msgDiv.className = "message";
@@ -180,27 +188,36 @@
         // 收集表單資料
         const formData = new FormData(this);
         
-        // 將資料轉換為 URLSearchParams 格式（相容 Apps Script 的 e.parameter 讀取）
+        // 將資料轉換為 URLSearchParams 格式
         const params = new URLSearchParams();
         for (const pair of formData) {
             params.append(pair[0], pair[1]);
         }
 
-        // 發送 POST 請求至 Google Apps Script
+        // 發送 POST 請求至 Google Apps Script（移除 no-cors 以取得真實後端回傳結果）
         fetch(SCRIPT_URL, {
             method: 'POST',
-            body: params,
-            mode: 'no-cors' // 使用 no-cors 模式避免瀏覽器的跨網域（CORS）阻擋
+            body: params
         })
-        .then(() => {
-            // 在 no-cors 模式下無法讀取 response 內容，但只要 fetch 成功，資料通常已成功寫入
-            msgDiv.textContent = "資料已成功提交！請至試算表確認。";
-            msgDiv.className = "message success";
-            document.getElementById('dataForm').reset(); // 提交成功後清空表單
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("連線失敗，HTTP 狀態碼：" + response.status);
+            }
+            return response.json(); // 解析 GAS 回傳的 JSON 訊息
+        })
+        .then(data => {
+            if (data.status === "success") {
+                msgDiv.textContent = "🎉 " + data.message;
+                msgDiv.className = "message success";
+                document.getElementById('dataForm').reset(); // 提交成功後清空表單
+            } else {
+                msgDiv.textContent = "❌ 寫入失敗：" + data.message;
+                msgDiv.className = "message error";
+            }
         })
         .catch(error => {
-            console.error('Error:', error);
-            msgDiv.textContent = "提交失敗，請檢查網路或 API 設定。";
+            console.error('詳細錯誤資訊:', error);
+            msgDiv.textContent = "❌ 提交失敗！請按 F12 開啟 Console 查看詳細錯誤原因。";
             msgDiv.className = "message error";
         })
         .finally(() => {
