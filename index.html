@@ -28,7 +28,14 @@
             text-align: center;
             color: #333333;
             margin-top: 0;
+            margin-bottom: 5px;
+        }
+        .form-notice {
+            text-align: center;
+            color: #e53e3e;
+            font-size: 13px;
             margin-bottom: 25px;
+            font-weight: bold;
         }
         .form-group {
             margin-bottom: 20px;
@@ -39,6 +46,11 @@
             color: #4a5568;
             font-weight: 600;
             font-size: 14px;
+        }
+        /* 自動為必填欄位加上紅星 */
+        .required-label::after {
+            content: " *";
+            color: #e53e3e;
         }
         input[type="text"], input[type="date"] {
             width: 100%;
@@ -63,6 +75,10 @@
             display: inline;
             margin-left: 5px;
             cursor: pointer;
+        }
+        /* 移除單選鈕選項後面的紅星 */
+        .radio-group label::after {
+            content: none;
         }
         .radio-item {
             display: flex;
@@ -101,14 +117,16 @@
 
 <div class="form-container">
     <h2>建功國小教師帳號申請及教師進修帳號移轉</h2>
+    <div class="form-notice">* 所有欄位皆為必填項目</div>
+    
     <form id="dataForm">
         <div class="form-group">
-            <label for="name">姓名</label>
+            <label for="name" class="required-label">姓名</label>
             <input type="text" id="name" name="name" required placeholder="請輸入姓名">
         </div>
         
         <div class="form-group">
-            <label>性別</label>
+            <label class="required-label">性別</label>
             <div class="radio-group">
                 <div class="radio-item">
                     <input type="radio" id="male" name="gender" value="男" required>
@@ -126,17 +144,17 @@
         </div>
         
         <div class="form-group">
-            <label for="dob">出生年月日 (西元)</label>
+            <label for="dob" class="required-label">出生年月日 (西元)</label>
             <input type="date" id="dob" name="dob" required>
         </div>
         
         <div class="form-group">
-            <label for="idNumber">身分證字號</label>
+            <label for="idNumber" class="required-label">身分證字號</label>
             <input type="text" id="idNumber" name="idNumber" required placeholder="例如：A123456789">
         </div>
         
         <div class="form-group">
-            <label for="account">自行設定帳號 (至少 6 個字元)</label>
+            <label for="account" class="required-label">自行設定帳號 (至少 6 個字元)</label>
             <input type="text" id="account" name="account" minlength="6" required placeholder="請設定 6 個字元以上的帳號">
         </div>
         
