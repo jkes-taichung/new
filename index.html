@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料登記表單</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 480px;
+        }
+        h2 {
+            text-align: center;
+            color: #333333;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        input[type="text"], input[type="date"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus, input[type="date"]:focus {
+            outline: none;
+            border-color: #3182ce;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            padding: 6px 0;
+        }
+        .radio-group label {
+            font-weight: normal;
+            display: inline;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #2b6cb0;
+        }
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .success { color: #38a169; }
+        .error { color: #e53e3e; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>資料登記表單</h2>
+    <form id="dataForm">
+        <div class="form-group">
+            <label for="name">姓名</label>
+            <input type="text" id="name" name="name" required placeholder="請輸入姓名">
+        </div>
+        
+        <div class="form-group">
+            <label>性別</label>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" id="male" name="gender" value="男" required>
+                    <label for="male">男</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="female" name="gender" value="女">
+                    <label for="female">女</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" id="other" name="gender" value="其他">
+                    <label for="other">其他</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="dob">出生年月日 (西元)</label>
+            <input type="date" id="dob" name="dob" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="idNumber">身分證字號</label>
+            <input type="text" id="idNumber" name="idNumber" required placeholder="例如：A123456789">
+        </div>
+        
+        <div class="form-group">
+            <label for="account">自行設定帳號 (至少 6 個字元)</label>
+            <input type="text" id="account" name="account" minlength="6" required placeholder="請設定 6 個字元以上的帳號">
+        </div>
+        
+        <button type="submit" id="submitBtn">提交資料</button>
+    </form>
+    <div id="responseMessage" class="message"></div>
+</div>
+
+<script>
+    // [請在此處替換] 貼上您在 Google Apps Script 部署後取得的「網頁應用程式 URL」
+    const SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL";
+
+    document.getElementById('dataForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // 阻止表單預設重新導向的行為
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const msgDiv = document.getElementById('responseMessage');
+        
+        submitBtn.disabled = true;
+        msgDiv.textContent = "資料傳送中，請稍候...";
+        msgDiv.className = "message";
+
+        // 收集表單資料
+        const formData = new FormData(this);
+        
+        // 將資料轉換為 URLSearchParams 格式（相容 Apps Script 的 e.parameter 讀取）
+        const params = new URLSearchParams();
+        for (const pair of formData) {
+            params.append(pair[0], pair[1]);
+        }
+
+        // 發送 POST 請求至 Google Apps Script
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            body: params,
+            mode: 'no-cors' // 使用 no-cors 模式避免瀏覽器的跨網域（CORS）阻擋
+        })
+        .then(() => {
+            // 在 no-cors 模式下無法讀取 response 內容，但只要 fetch 成功，資料通常已成功寫入
+            msgDiv.textContent = "資料已成功提交！請至試算表確認。";
+            msgDiv.className = "message success";
+            document.getElementById('dataForm').reset(); // 提交成功後清空表單
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            msgDiv.textContent = "提交失敗，請檢查網路或 API 設定。";
+            msgDiv.className = "message error";
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+        });
+    });
+</script>
+
+</body>
+</html>
