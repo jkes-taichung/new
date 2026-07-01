@@ -31,15 +31,24 @@
             border-top: 6px solid #2b6cb0; /* 頂部裝飾條 */
         }
 
-        /* 標題美化 */
+        /* 標題美化與校徽對齊設定 */
         h2 { 
-            text-align: center; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px; /* 校徽與文字之間的間距 */
             color: #1a365d; 
             margin-top: 0; 
             margin-bottom: 32px; 
             font-size: 2rem; 
             font-weight: 700;
             letter-spacing: 1px;
+        }
+
+        /* 校徽大小控制 */
+        .school-logo {
+            height: 50px;
+            width: auto;
         }
 
         .form-group { 
@@ -223,7 +232,10 @@
 <body>
 
 <div class="form-container">
-    <h2>建功國小新進教師帳號申請</h2>
+    <h2>
+        <img src="https://jkes.tc.edu.tw/var/file/196/1196/img/big-logo.gif" alt="建功國小校徽" class="school-logo">
+        建功國小教師帳號申請
+    </h2>
     <form id="dataForm">
         <div class="form-group">
             <label for="name" class="required-label">姓名</label>
@@ -265,7 +277,7 @@
 <div id="successModal" class="modal">
     <div class="modal-content">
         <h3>🎉 成功提交！</h3>
-        <p>資料已成功送出，<br>歡迎加入建功國小團隊。</p>
+        <p>資料已成功寫入，<br>歡迎加入建功國小團隊。</p>
         <button class="modal-btn" onclick="closeModal()">確定</button>
     </div>
 </div>
